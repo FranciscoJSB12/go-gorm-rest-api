@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgres:15.3
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: go_backend
+    container_name: go_backend_demo
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
