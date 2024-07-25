@@ -6,6 +6,7 @@ import (
 
 	"github.com/FranciscoJSB12/go-gorm-rest-api/db"
 	"github.com/FranciscoJSB12/go-gorm-rest-api/models"
+	"github.com/gorilla/mux"
 )
 
 func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +16,20 @@ func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("get user"))
+
+	var user models.User
+
+	params := mux.Vars(r)
+
+	db.DB.First(&user, params["id"])
+
+	if user.ID == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("User not found"))
+		return
+	}
+
+	json.NewEncoder(w).Encode(&user)
 }
 
 func PostUsersHandler(w http.ResponseWriter, r *http.Request) {
@@ -36,5 +50,19 @@ func PostUsersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func DeleteUsersHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("delete user"))
+	var user models.User
+
+	params := mux.Vars(r)
+
+	db.DB.First(&user, params["id"])
+
+	if user.ID == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("User not found"))
+		return
+	}
+
+	//db.DB.Delete(&user) Eliminar acceso, pero no eliminar por completo
+	db.DB.Unscoped().Delete(&user) // Eliminar por completo
+	w.WriteHeader(http.StatusOK)
 }
